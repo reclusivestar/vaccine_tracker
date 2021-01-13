@@ -3,12 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@nivo/bar": "^0.67.0",
+    "@nivo/core": "^0.67.0",
+    "@nivo/geo": "^0.67.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",
+    "axios": "^0.21.1",
+    "d3-fetch": "^2.0.0",
+    "d3-scale": "^3.2.3",
+    "nivo": "^0.31.0",
+    "papaparse": "^5.3.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.1",
+    "react-simple-maps": "^2.3.0",
+    "react-usa-map": "^1.5.0",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
