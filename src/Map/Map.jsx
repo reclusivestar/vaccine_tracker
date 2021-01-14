@@ -7,8 +7,9 @@ import {
     Annotation
   } from "react-simple-maps";
 import { scaleQuantize } from "d3-scale";
+import { extent } from "d3-array";
 import { geoCentroid } from "d3-geo";
-
+import axios from 'axios';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -25,24 +26,43 @@ const offsets = {
   };
 
 const Map = (props) => {
+  const url = "https://datausa.io/api/data?drilldowns=State&measures=Population";
   const [allStates, setAllStates] = useState([]);
+  const [populations, setPopulations] = useState([]);
+
+  async function getAllPopulations(){
+    const response = await axios.get(url); 
+    setPopulations(response.data.data);
+  }
 
   useEffect(() => {
     let data = filterField(props.data, "people_total");
     setAllStates(filterDate(data, "12/18/2020"));
   }, [props.data]);
 
+  useEffect(() => {
+    getAllPopulations();
+  }, []);
+
   function extractNumbers() {
     let data = [];
     allStates.forEach(state => {
-      if (state.data[0])
-        data.push(state.data[0].count);
+      if (state.data[0]){
+        data.push(getRate(state.val, state.data[0].count));
+      }
     });
     return data;
   }
 
+  function getRate(val, count){
+    let pop = populations.filter(state => state["ID State"].slice(-2) === val)[0];
+    if (pop) //some states not in population data
+      return count / pop.Population * 100;
+    return 1;
+  }
+
   const colorScale = scaleQuantize()
-  .domain([1, 300000])
+  .domain(extent(extractNumbers())).nice()
   .range([
     "#ffedea",
     "#ffcec5",
@@ -92,7 +112,9 @@ const Map = (props) => {
   }
 
   const handleClick = val => () => {
-    console.log(allStates.filter(state => state.val === val));
+    let state = allStates.filter(state => state.val === val);
+    //console.log(getRate(val, state[0].data[0].count));
+    console.log(state);
   };
 
   console.log(allStates);
@@ -111,7 +133,7 @@ const Map = (props) => {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={cur && cur.data[0] ? colorScale(cur.data[0].count) : "#A9A9A9"}
+                  fill={cur && cur.data[0] ? colorScale(getRate(cur.val, cur.data[0].count)) : "#A9A9A9"}
                   onClick={handleClick(geo.id)}
                   /*onMouseEnter={() => console.log(geo.id)}*/
                 />
