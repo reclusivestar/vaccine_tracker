@@ -67,7 +67,7 @@ export default function Vaccine() {
 
     console.log(allData);
     return ( 
-        <div>
+        <div style={{width: "80%"}}>
         <Map data={allData}/>
         </div>
     );

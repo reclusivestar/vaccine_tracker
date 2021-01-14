@@ -7,9 +7,8 @@ import {
     Annotation
   } from "react-simple-maps";
 import { scaleQuantize } from "d3-scale";
-import { csv } from "d3-fetch";
-import allStates from "./states.json";
 import { geoCentroid } from "d3-geo";
+
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -24,10 +23,26 @@ const offsets = {
     MD: [47, 10],
     DC: [49, 21]
   };
-  
 
-const colorScale = scaleQuantize()
-  .domain([1, 30])
+const Map = (props) => {
+  const [allStates, setAllStates] = useState([]);
+
+  useEffect(() => {
+    let data = filterField(props.data, "people_total");
+    setAllStates(filterDate(data, "12/18/2020"));
+  }, [props.data]);
+
+  function extractNumbers() {
+    let data = [];
+    allStates.forEach(state => {
+      if (state.data[0])
+        data.push(state.data[0].count);
+    });
+    return data;
+  }
+
+  const colorScale = scaleQuantize()
+  .domain([1, 300000])
   .range([
     "#ffedea",
     "#ffcec5",
@@ -39,18 +54,6 @@ const colorScale = scaleQuantize()
     "#9a311f",
     "#782618"
   ]);
-
-const Map = (props) => {
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    // https://www.bls.gov/lau/
-    csv("/counties.csv").then(counties => {
-      setData(counties);
-    });
-  }, []);
-
-  console.log(props.data);
 
   function filterLatest(){
     let latest = [];
@@ -79,7 +82,21 @@ const Map = (props) => {
       return filtered;
   }
 
-  console.log(filterField(filterLatest(), "people_total"));
+  function filterDate(data, date) {
+    let filtered = [];
+    data.forEach(state => {
+      let newData = state.data.filter(data => data.date === date);
+      filtered.push({...state, data: newData});
+    });
+    return filtered;
+  }
+
+  const handleClick = val => () => {
+    console.log(allStates.filter(state => state.val === val));
+  };
+
+  console.log(allStates);
+  console.log(extractNumbers());
 
   return (
     <>
@@ -94,7 +111,9 @@ const Map = (props) => {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill={colorScale(cur ? cur.s : "#EEE")}
+                  fill={cur && cur.data[0] ? colorScale(cur.data[0].count) : "#A9A9A9"}
+                  onClick={handleClick(geo.id)}
+                  /*onMouseEnter={() => console.log(geo.id)}*/
                 />
               );
             })}
