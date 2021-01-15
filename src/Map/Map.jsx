@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, setState } from "react";
 import {
     ComposableMap,
     Geographies,
@@ -28,7 +28,34 @@ const offsets = {
 const Map = (props) => {
   const url = "https://datausa.io/api/data?drilldowns=State&measures=Population";
   const [allStates, setAllStates] = useState([]);
+  const [timeSeries, setTimeSeries] = useState([]);
   const [populations, setPopulations] = useState([]);
+  const colors = ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
+  "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];
+
+  function extractNumbers() {
+    let data = [];
+    timeSeries.forEach(state => {
+      if (state.data[0]){
+        state.data.forEach(date => 
+          data.push(getRate(state.val, date.count))
+        );
+      }
+    });
+    return data;
+  }
+
+  const colorScale = scaleQuantize()
+  .domain(extent(extractNumbers())).nice()
+  .range(colors);
+  
+  function extractDomain(){
+    const domains = [];
+    colors.forEach(color => 
+      domains.push({"color" : color, "range" : colorScale.invertExtent(color)})
+    );
+    return domains;
+  }
 
   async function getAllPopulations(){
     const response = await axios.get(url); 
@@ -37,43 +64,18 @@ const Map = (props) => {
 
   useEffect(() => {
     let data = filterField(props.data, "people_total");
+    setTimeSeries(data);
     setAllStates(filterDate(data, "12/18/2020"));
+    getAllPopulations();
   }, [props.data]);
 
-  useEffect(() => {
-    getAllPopulations();
-  }, []);
-
-  function extractNumbers() {
-    let data = [];
-    allStates.forEach(state => {
-      if (state.data[0]){
-        data.push(getRate(state.val, state.data[0].count));
-      }
-    });
-    return data;
-  }
 
   function getRate(val, count){
     let pop = populations.filter(state => state["ID State"].slice(-2) === val)[0];
     if (pop) //some states not in population data
       return count / pop.Population * 100;
-    return 1;
+    return 0;
   }
-
-  const colorScale = scaleQuantize()
-  .domain(extent(extractNumbers())).nice()
-  .range([
-    "#ffedea",
-    "#ffcec5",
-    "#ffad9f",
-    "#ff8a75",
-    "#ff5533",
-    "#e2492d",
-    "#be3d26",
-    "#9a311f",
-    "#782618"
-  ]);
 
   function filterLatest(){
     let latest = [];
@@ -98,8 +100,8 @@ const Map = (props) => {
             });
         }
         filtered.push({...field, data: parsed});
-      });
-      return filtered;
+    });
+    return filtered;
   }
 
   function filterDate(data, date) {
@@ -113,15 +115,35 @@ const Map = (props) => {
 
   const handleClick = val => () => {
     let state = allStates.filter(state => state.val === val);
-    //console.log(getRate(val, state[0].data[0].count));
+    console.log(getRate(val, state[0].data[0].count));
     console.log(state);
   };
 
   console.log(allStates);
   console.log(extractNumbers());
 
+  function legend(){
+    let domains = extractDomain();
+    console.log(domains);
+    return (
+      <div style={{marginLeft: "5%", marginTop: "10%"}}>
+        {domains.map((domain, i) => {
+          let low = Math.round((domain.range[0] + Number.EPSILON) * 100) / 100;
+          let high = Math.round((domain.range[1] + Number.EPSILON) * 100) / 100;
+          return (
+            <div style={{display: "flex"}}>
+              <div style={{ backgroundColor: colors[i], padding: "1vw" }} key={i}></div>
+                <p style={{fontSize: "1vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
+              </div>
+          )}
+        )}
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div style={{display: "flex",  justifyContent: "center"}}>
+      <div style={{width: "80%"}}>
       <ComposableMap projection="geoAlbersUsa">
         <Geographies geography={geoUrl}>
         {({ geographies }) => (
@@ -171,7 +193,9 @@ const Map = (props) => {
         )}
       </Geographies>
       </ComposableMap>
-    </>
+      </div>
+      {legend()}
+    </div>
   );
 };
 
