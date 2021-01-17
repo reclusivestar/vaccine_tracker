@@ -31,18 +31,10 @@ const Map = (props) => {
   const [allStates, setAllStates] = useState([]);
   const [timeSeries, setTimeSeries] = useState([]);
   const [populations, setPopulations] = useState([]);
-  const [selectedTime, setSelectedTime] = useState(new Date());
-  const [startDate, setStartDate] = useState([]);
-  const [endDate, setEndDate] = useState([]);
+  const [selectedTime, setSelectedTime] = useState();
 
   const colors = ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
   "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];
-
-  const dateTicks = scaleTime()
-      .domain([startDate, endDate])
-      .ticks(16)
-      //.ticks(parseInt((endDate - startDate) / (1000 * 60 * 60 * 24), 10))
-      .map((d) => +d);
 
   function extractNumbers() {
     let data = [];
@@ -76,26 +68,14 @@ const Map = (props) => {
   useEffect(() => {
     let data = filterField(props.data, "people_total");
     setTimeSeries(data);
-    setDateRange(data);
-    setAllStates(filterDate(data, selectedTime));
+    //setDateRange(data);
+    setAllStates(filterDate(data, "12/14/2020"));
     getAllPopulations();
   }, [props.data]);
 
   useEffect(() => {
     setAllStates(filterDate(timeSeries, selectedTime));
   }, [selectedTime]);
-
-  function setDateRange(states) {
-    let dates = [];
-    states.forEach(state => {
-      state.data.forEach(data => dates.push(new Date(data.date)));
-    });
-    let maxDate = new Date(Math.max.apply(null,dates));
-    let minDate = new Date(Math.min.apply(null,dates));
-    setStartDate(minDate);
-    setEndDate(maxDate);
-    setSelectedTime(minDate);
-  }
 
   function getRate(val, count){
     let pop = populations.filter(state => state["ID State"].slice(-2) === val)[0];
@@ -214,7 +194,7 @@ const Map = (props) => {
         </div>
         {legend()}
       </div>
-    <Time start={startDate} end={endDate} selectDate={setSelectedTime}/>
+    <Time selectDate={setSelectedTime}/>
     </div>
   );
 };
@@ -232,4 +212,15 @@ export default Map;
         latest.push({...field, data: newData});
     });
     return latest;
+  }*/
+
+  /*function setDateRange(states) {
+    let dates = [];
+    states.forEach(state => {
+      state.data.forEach(data => dates.push(new Date(data.date)));
+    });
+    let maxDate = new Date(Math.max.apply(null,dates));
+    let minDate = new Date(Math.min.apply(null,dates));
+    setStartDate(minDate);
+    setEndDate(maxDate);
   }*/
