@@ -6,11 +6,12 @@ import {
     Marker,
     Annotation
   } from "react-simple-maps";
-import { scaleQuantize, scaleTime } from "d3-scale";
+import { scaleQuantize } from "d3-scale";
 import { extent } from "d3-array";
 import { geoCentroid } from "d3-geo";
 import axios from 'axios';
 import Time from './Time';
+import { startOfToday, format } from "date-fns";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -67,8 +68,8 @@ const Map = (props) => {
 
   useEffect(() => {
     let data = filterField(props.data, "people_total");
+    data = makeContinuous(data);
     setTimeSeries(data);
-    //setDateRange(data);
     setAllStates(filterDate(data, "12/14/2020"));
     getAllPopulations();
   }, [props.data]);
@@ -87,16 +88,63 @@ const Map = (props) => {
   function filterField(allData, title){
     let filtered = [];
     allData.forEach(field => {
-    let onlyData = field.data.filter(row => row.title === title)[0].data;
-    let parsed = [];
-        if (onlyData){
-            parsed = onlyData.map(val => {
-                return {"date" : val[0], "count" : parseInt(val[2])};
-            });
-        }
-        filtered.push({...field, data: parsed});
+      let onlyData = field.data.filter(row => row.title === title)[0].data;
+      let parsed = [];
+      if (onlyData){
+          parsed = onlyData.map(val => {
+              return {"date" : val[0], "count" : parseInt(val[2])};
+          });
+      }
+      filtered.push({...field, data: parsed});
     });
     return filtered;
+  }
+
+  //update with days until today copying the last provided data
+  function expandUntilToday(allData){
+    allData.forEach(state => {
+      if (state.data.length) {
+        let latest = new Date(state.data[state.data.length - 1].date);
+        let latestCount = state.data[state.data.length - 1].count
+        let days = parseInt((startOfToday() - latest) / (1000 * 60 * 60 * 24), 10);
+        while (days > 0) {
+          latest.setDate(latest.getDate() + 1);
+          state.data.push({
+            date : format(latest, "MM/dd/yyyy"),
+            count: latestCount
+          });
+          days--;
+        }
+      }
+    })
+    return allData;
+  }
+
+  // fill gaps between first and second date with data from the first
+  function makeContinuous(allData){
+    let continuous = [];
+    allData.forEach(state => {
+      let newIndex = 0;
+      let newState = {...state};
+      newState.data = Array.from(state.data);
+      for (let i = 0; i + 1 < state.data.length; i++){
+        let start = new Date(state.data[i].date);
+        let end = new Date(state.data[i+1].date);
+        let days = parseInt((end - start) / (1000 * 60 * 60 * 24), 10);
+        while (days > 1){
+          newIndex++;
+          start.setDate(start.getDate() + 1);
+          newState.data.splice(newIndex, 0, {
+            date: format(start, "MM/dd/yyyy"),
+            count: state.data[i].count
+          });
+          days--;
+        }
+        newIndex++;
+      }
+      continuous.push(newState);
+    });
+    return expandUntilToday(continuous);
   }
 
   function filterDate(data, date) {
@@ -116,7 +164,6 @@ const Map = (props) => {
   };
 
   console.log(allStates);
-  console.log(extractNumbers());
   console.log(timeSeries);
 
   function legend(){
