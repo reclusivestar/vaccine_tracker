@@ -9,6 +9,16 @@ export default function Vaccine() {
     const url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/raw_data/vaccine_data_us_state_timeline.csv";
 
     const [allData, setAllData] = useState([]); //in time series
+    const [subject, setSubject] = useState("doses_admin_total");
+    const [allTitles, setAllTitles] = useState([]);
+
+    function extractTitles(allData) {
+        const titles = [];
+        allData.forEach(data => {
+            titles.push(data.title)
+        })
+        setAllTitles(titles);
+    }
     
     function transformData(raw){
         let results = [];
@@ -30,6 +40,7 @@ export default function Vaccine() {
         }
         let valid_results = results.slice(4);
         console.log(valid_results);
+        extractTitles(valid_results);
         getDataByState(valid_results);
     }
 
@@ -65,10 +76,27 @@ export default function Vaccine() {
         setAllData(latest_all);
     }
 
+    function chooseSubject(){
+        return (
+            <div>
+                <label for="titles">Choose Data: </label>
+                <select name="titles" id="titles" onChange={(e) => setSubject(e.target.value)} value={subject}>
+                {allTitles.map((title, i) => {
+                    return(
+                        <option value={title}>{title}</option>
+                    )}
+                )}
+                </select>
+            </div>
+        );
+    }
+
     console.log(allData);
+    console.log(subject);
     return ( 
         <div style={{width: "80%"}}>
-        <Map data={allData}/>
+            {chooseSubject()}
+            <Map data={allData} title={subject}/>
         </div>
     );
 }

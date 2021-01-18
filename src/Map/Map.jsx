@@ -65,15 +65,26 @@ const Map = (props) => {
     const response = await axios.get(url); 
     setPopulations(response.data.data);
   }
-
+  //set defaults when map first loads
   useEffect(() => {
-    let data = filterField(props.data, "people_total");
+    console.log(props.data)
+    let data = filterField(props.data, props.title);
     data = makeContinuous(data);
     setTimeSeries(data);
     setAllStates(filterDate(data, "12/14/2020"));
     getAllPopulations();
   }, [props.data]);
 
+  //changes based on the data selected
+  useEffect(() => {
+    let data = filterField(props.data, props.title);
+    data = makeContinuous(data);
+    setTimeSeries(data);
+    setAllStates(filterDate(data, selectedTime));
+    getAllPopulations();
+  }, [props.title])
+
+  //changes based on time selected
   useEffect(() => {
     setAllStates(filterDate(timeSeries, selectedTime));
   }, [selectedTime]);
@@ -176,8 +187,8 @@ const Map = (props) => {
           let high = Math.round((domain.range[1] + Number.EPSILON) * 100) / 100;
           return (
             <div style={{display: "flex"}}>
-              <div style={{ backgroundColor: colors[i], padding: "1vw" }} key={i}></div>
-                <p style={{fontSize: "1vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
+              <div style={{ backgroundColor: colors[i], padding: "0.8vw" }} key={i}></div>
+                <p style={{fontSize: "0.7vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
               </div>
           )}
         )}
@@ -188,7 +199,7 @@ const Map = (props) => {
   return (
     <div>
       <div style={{display: "flex",  justifyContent: "center"}}>
-        <div style={{width: "80%"}}>
+        <div style={{width: "60%"}}>
         <ComposableMap projection="geoAlbersUsa">
           <Geographies geography={geoUrl}>
           {({ geographies }) => (
