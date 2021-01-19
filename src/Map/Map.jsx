@@ -236,8 +236,8 @@ const Map = (props) => {
   return (
     <div>
       <div style={{display: "flex", justifyContent: "center"}}>
-        <p>Total Count: {addCommas(cumalativeSum)}</p>
-        <p style={{paddingLeft: "1vw"}}>% of US Population: {(cumalativeSum / USPopulation * 100).toFixed(4)}%</p>
+        <p>Total Count: <b>{addCommas(cumalativeSum)}</b></p>
+        <p style={{paddingLeft: "1vw"}}>% of US Population: <b>{(cumalativeSum / USPopulation * 100).toFixed(4)}%</b></p>
       </div>
       <div style={{display: "flex",  justifyContent: "center"}}>
         <div style={{width: "75%"}}>
