@@ -7,10 +7,12 @@ import states from '../Map/states.json';
 export default function Vaccine() {
 
     const url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/raw_data/vaccine_data_us_state_timeline.csv";
+    const definitions_url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/raw_data/data_dictionary.csv";
 
     const [allData, setAllData] = useState([]); //in time series
     const [subject, setSubject] = useState("doses_admin_total");
     const [allTitles, setAllTitles] = useState([]);
+    const [allDefinitions, setAllDefinitions] = useState([]);
 
     function extractTitles(allData) {
         const titles = [];
@@ -18,6 +20,23 @@ export default function Vaccine() {
             titles.push(data.title)
         })
         setAllTitles(titles);
+    }
+
+    function formatTitle(title){
+        if (title === "people_total")
+            return "People Total 1st Dose";
+
+        let newTitle = title.split('_');
+        newTitle.map((word, i) => {
+            if (word === "alloc")
+                newTitle[i] = "allocated";
+            if (word === "admin")
+                newTitle[i] = "administered";
+        })
+        newTitle.map((word, i) => {
+            newTitle[i] = word[0].toUpperCase() + word.substring(1);
+        })
+        return newTitle.join(' ');
     }
     
     function transformData(raw){
@@ -44,6 +63,14 @@ export default function Vaccine() {
         getDataByState(valid_results);
     }
 
+    function transformDataDefinitions(csv){
+        let definitions = [];
+        csv.data.forEach(col => {
+            definitions.push(col);
+        });
+        setAllDefinitions(definitions.slice(4, definitions.length - 1));
+    }
+
     useEffect(() => {
         async function fetchCSV(){
             const csv = await axios.get(url).then(response => 
@@ -51,7 +78,14 @@ export default function Vaccine() {
                           { header: true }));
             transformData(csv);
         }
+        async function fetchDefinitions(){
+            const csv = await axios.get(definitions_url).then(response => 
+                Papa.parse(response.data,
+                          { header: true }));
+            transformDataDefinitions(csv);
+        }
         fetchCSV();
+        fetchDefinitions();
     }, []);
 
     function filterState(raw, state){
@@ -76,17 +110,28 @@ export default function Vaccine() {
         setAllData(latest_all);
     }
 
+    function getDefinition() {
+        let data = allDefinitions.filter(def => def.column_name === subject)[0];
+        if (data)
+            return data.definition;
+    }
+
     function chooseSubject(){
         return (
-            <div>
-                <label for="titles">Choose Data: </label>
-                <select name="titles" id="titles" onChange={(e) => setSubject(e.target.value)} value={subject}>
-                {allTitles.map((title, i) => {
-                    return(
-                        <option value={title}>{title}</option>
+            <div style={{display: "flex", justifyContent: "center"}}>
+                <div style={{padding: "1.4vw"}}>
+                    <label for="titles">Choose Data: </label>
+                    <select name="titles" id="titles" onChange={(e) => setSubject(e.target.value)} value={subject}>
+                    {allTitles.map(title => {
+                        return(
+                            <option value={title}>{formatTitle(title)}</option>
+                        )}
                     )}
-                )}
-                </select>
+                    </select>
+                </div>
+                <div>
+                    <h2 style={{fontWeight: "lighter"}}>{getDefinition()}</h2>
+                </div>
             </div>
         );
     }
@@ -94,7 +139,7 @@ export default function Vaccine() {
     console.log(allData);
     console.log(subject);
     return ( 
-        <div style={{width: "80%"}}>
+        <div style={{marginLeft: "15%", width: "60%"}}>
             {chooseSubject()}
             <Map data={allData} title={subject}/>
         </div>

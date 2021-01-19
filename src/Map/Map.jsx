@@ -29,10 +29,13 @@ const offsets = {
 
 const Map = (props) => {
   const url = "https://datausa.io/api/data?drilldowns=State&measures=Population";
+  const us_population_url = "https://datausa.io/api/data?drilldowns=Nation&measures=Population";
   const [allStates, setAllStates] = useState([]);
   const [timeSeries, setTimeSeries] = useState([]);
   const [populations, setPopulations] = useState([]);
+  const [USPopulation, setUSPopulation] = useState([]);
   const [selectedTime, setSelectedTime] = useState();
+  const [cumalativeSum, setCumalativeSum] = useState(0);
 
   const colors = ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
   "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];
@@ -65,6 +68,11 @@ const Map = (props) => {
     const response = await axios.get(url); 
     setPopulations(response.data.data);
   }
+  async function getUSPopulation(){
+    const response = await axios.get(us_population_url); 
+    setUSPopulation(parseInt(response.data.data[0].Population));
+  }
+
   //set defaults when map first loads
   useEffect(() => {
     console.log(props.data)
@@ -73,6 +81,7 @@ const Map = (props) => {
     setTimeSeries(data);
     setAllStates(filterDate(data, "12/14/2020"));
     getAllPopulations();
+    getUSPopulation();
   }, [props.data]);
 
   //changes based on the data selected
@@ -92,7 +101,7 @@ const Map = (props) => {
   function getRate(val, count){
     let pop = populations.filter(state => state["ID State"].slice(-2) === val)[0];
     if (pop) //some states not in population data
-      return count / pop.Population * 100;
+      return count / parseInt(pop.Population) * 100;
     return 0;
   }
 
@@ -165,7 +174,17 @@ const Map = (props) => {
       filtered.push({...state, data: newData});
     });
     console.log(filtered, date);
+    getSum(filtered);
     return filtered;
+  }
+
+  function getSum(data){
+    let sum = 0;
+    data.forEach(state => {
+      if(state.data.length)
+        sum += state.data[0].count;
+    })
+    setCumalativeSum(sum);
   }
 
   const handleClick = val => () => {
@@ -187,8 +206,8 @@ const Map = (props) => {
           let high = Math.round((domain.range[1] + Number.EPSILON) * 100) / 100;
           return (
             <div style={{display: "flex"}}>
-              <div style={{ backgroundColor: colors[i], padding: "0.8vw" }} key={i}></div>
-                <p style={{fontSize: "0.7vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
+              <div style={{ backgroundColor: colors[i], padding: "0.5vw" }} key={i}></div>
+                <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
               </div>
           )}
         )}
@@ -198,8 +217,9 @@ const Map = (props) => {
 
   return (
     <div>
+      <div style={{marginLeft: "30%"}}>Total Count (US Population): {cumalativeSum} ({(cumalativeSum / USPopulation * 100).toFixed(4)}%)</div>
       <div style={{display: "flex",  justifyContent: "center"}}>
-        <div style={{width: "60%"}}>
+        <div style={{width: "75%"}}>
         <ComposableMap projection="geoAlbersUsa">
           <Geographies geography={geoUrl}>
           {({ geographies }) => (
