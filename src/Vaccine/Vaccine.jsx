@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import axios from 'axios';
 import Map from '../Map/Map';
 import states from '../Map/states.json';
+import ReactTooltip from 'react-tooltip';
 
 export default function Vaccine() {
 
@@ -13,6 +14,7 @@ export default function Vaccine() {
     const [subject, setSubject] = useState("doses_admin_total");
     const [allTitles, setAllTitles] = useState([]);
     const [allDefinitions, setAllDefinitions] = useState([]);
+    const [content, setContent] = useState("");
 
     function extractTitles(allData) {
         const titles = [];
@@ -141,7 +143,8 @@ export default function Vaccine() {
     return ( 
         <div style={{marginLeft: "15%", width: "60%"}}>
             {chooseSubject()}
-            <Map data={allData} title={subject}/>
+            <Map data={allData} title={subject} setTooltipContent={setContent}/>
+            <ReactTooltip>{content}</ReactTooltip>
         </div>
     );
 }

@@ -12,6 +12,7 @@ import { geoCentroid } from "d3-geo";
 import axios from 'axios';
 import Time from './Time';
 import { startOfToday, format } from "date-fns";
+import state_names from './states_hash.json';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -189,7 +190,8 @@ const Map = (props) => {
 
   const handleClick = val => () => {
     let state = allStates.filter(state => state.val === val);
-    console.log(getRate(val, state[0].data[0].count));
+    if (state[0].data.length)
+      console.log(getRate(val, state[0].data[0].count));
     console.log(state);
   };
 
@@ -220,7 +222,7 @@ const Map = (props) => {
       <div style={{marginLeft: "30%"}}>Total Count (US Population): {cumalativeSum} ({(cumalativeSum / USPopulation * 100).toFixed(4)}%)</div>
       <div style={{display: "flex",  justifyContent: "center"}}>
         <div style={{width: "75%"}}>
-        <ComposableMap projection="geoAlbersUsa">
+        <ComposableMap data-tip="" projection="geoAlbersUsa">
           <Geographies geography={geoUrl}>
           {({ geographies }) => (
             <>
@@ -233,7 +235,21 @@ const Map = (props) => {
                     geography={geo}
                     fill={cur && cur.data[0] ? colorScale(getRate(cur.val, cur.data[0].count)) : "#A9A9A9"}
                     onClick={handleClick(geo.id)}
-                    /*onMouseEnter={() => console.log(geo.id)}*/
+                    onMouseEnter={() => {
+                      let state = allStates.filter(state => state.val === geo.id);
+                      let toolContent = <p>{state_names[state[0].id] + ": N/A"}</p> 
+                      if (state[0].data.length)
+                        toolContent = 
+                          <div>
+                            <u>{state_names[state[0].id]}</u>
+                            <p>{"Count: " + state[0].data[0].count}</p>
+                            <p>{"% of state population: " + getRate(geo.id, state[0].data[0].count).toFixed(4) +"%"}</p>
+                          </div>;
+                      props.setTooltipContent(toolContent);
+                    }}
+                    onMouseLeave={() => {
+                      props.setTooltipContent("");
+                    }}
                   />
                 );
               })}
