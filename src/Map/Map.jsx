@@ -37,6 +37,7 @@ const Map = (props) => {
   const [USPopulation, setUSPopulation] = useState([]);
   const [selectedTime, setSelectedTime] = useState();
   const [cumalativeSum, setCumalativeSum] = useState(0);
+  const [highlightBox, setHighlightBox] = useState("");
 
   const colors = ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
   "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];
@@ -212,13 +213,19 @@ const Map = (props) => {
           let high = Math.round((domain.range[1] + Number.EPSILON) * 100) / 100;
           return (
             <div style={{display: "flex"}}>
-              <div style={{ backgroundColor: colors[i], padding: "0.5vw" }} key={i}></div>
+              {highlightBox === colors[i] ? 
+              <div style={{ backgroundColor: colors[i], padding: "0.5vw", outline: "3px solid red" }} key={i}></div>
+              :
+              <div style={{ backgroundColor: colors[i], padding: "0.5vw" }} key={i}></div>}
               <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
             </div>
           )}
         )}
         <div style={{display: "flex", marginTop: "1vw"}}>
-          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw" }}></div>
+          {highlightBox === "#A9A9A9" ? 
+          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw", outline: "3px solid red" }}></div>
+          :
+          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw" }}></div>}
           <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>No Data Available</p>
         </div>
       </div>
@@ -256,9 +263,11 @@ const Map = (props) => {
                             <p>{"% of state population: " + getRate(geo.id, state[0].data[0].count).toFixed(4) +"%"}</p>
                           </div>;
                       props.setTooltipContent(toolContent);
+                      setHighlightBox(cur && cur.data[0] ? colorScale(getRate(cur.val, cur.data[0].count)) : "#A9A9A9");
                     }}
                     onMouseLeave={() => {
                       props.setTooltipContent("");
+                      setHighlightBox("");
                     }}
                   />
                 );
