@@ -195,6 +195,10 @@ const Map = (props) => {
     console.log(state);
   };
 
+  function addCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   console.log(allStates);
   console.log(timeSeries);
 
@@ -209,17 +213,24 @@ const Map = (props) => {
           return (
             <div style={{display: "flex"}}>
               <div style={{ backgroundColor: colors[i], padding: "0.5vw" }} key={i}></div>
-                <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
-              </div>
+              <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
+            </div>
           )}
         )}
+        <div style={{display: "flex", marginTop: "1vw"}}>
+          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw" }}></div>
+          <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>No Data Available</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{marginLeft: "30%"}}>Total Count (US Population): {cumalativeSum} ({(cumalativeSum / USPopulation * 100).toFixed(4)}%)</div>
+      <div style={{display: "flex", justifyContent: "center"}}>
+        <p>Total Count: {addCommas(cumalativeSum)}</p>
+        <p style={{paddingLeft: "1vw"}}>% of US Population: {(cumalativeSum / USPopulation * 100).toFixed(4)}%</p>
+      </div>
       <div style={{display: "flex",  justifyContent: "center"}}>
         <div style={{width: "75%"}}>
         <ComposableMap data-tip="" projection="geoAlbersUsa">
@@ -227,7 +238,6 @@ const Map = (props) => {
           {({ geographies }) => (
             <>
               {geographies.map(geo => {
-                //const cur = data.find(s => s.id === geo.id);
                 const cur = allStates.find(s => s.val === geo.id);
                 return (
                   <Geography
@@ -242,7 +252,7 @@ const Map = (props) => {
                         toolContent = 
                           <div>
                             <u>{state_names[state[0].id]}</u>
-                            <p>{"Count: " + state[0].data[0].count}</p>
+                            <p>{"Count: " + addCommas(state[0].data[0].count)}</p>
                             <p>{"% of state population: " + getRate(geo.id, state[0].data[0].count).toFixed(4) +"%"}</p>
                           </div>;
                       props.setTooltipContent(toolContent);

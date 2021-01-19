@@ -141,7 +141,7 @@ export default function Vaccine() {
     console.log(allData);
     console.log(subject);
     return ( 
-        <div style={{marginLeft: "15%", width: "60%"}}>
+        <div style={{marginLeft: "18%", width: "60%"}}>
             {chooseSubject()}
             <Map data={allData} title={subject} setTooltipContent={setContent}/>
             <ReactTooltip>{content}</ReactTooltip>
