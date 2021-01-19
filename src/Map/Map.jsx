@@ -39,8 +39,9 @@ const Map = (props) => {
   const [cumalativeSum, setCumalativeSum] = useState(0);
   const [highlightBox, setHighlightBox] = useState("");
 
-  const colors = ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
-  "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];
+  const colors = ["#f0f9e8", "#97d5c0", "#4ba8c9", "#1d79b5", "#254b8c"]; 
+  /* ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
+  "#ff5533", "#e2492d", "#be3d26", "#9a311f", "#782618"];*/
 
   function extractNumbers() {
     let data = [];
