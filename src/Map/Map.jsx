@@ -89,6 +89,7 @@ const Map = (props) => {
     setAllStates(filterDate(data, today));
     getAllPopulations();
     getUSPopulation();
+    setSelectedTime(today);
   }, [props.data]);
 
   //changes based on the data selected
