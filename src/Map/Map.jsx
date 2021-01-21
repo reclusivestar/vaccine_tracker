@@ -13,6 +13,7 @@ import axios from 'axios';
 import Time from './Time';
 import { startOfToday, format } from "date-fns";
 import state_names from './states_hash.json';
+import { useMediaQuery } from 'react-responsive';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -38,6 +39,8 @@ const Map = (props) => {
   const [selectedTime, setSelectedTime] = useState();
   const [cumalativeSum, setCumalativeSum] = useState(0);
   const [highlightBox, setHighlightBox] = useState("");
+
+  const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
 
   const colors = ["#f0f9e8", "#97d5c0", "#4ba8c9", "#1d79b5", "#254b8c"]; 
   /* ["#ffedea", "#ffcec5", "#ffad9f", "#ff8a75", 
@@ -78,11 +81,12 @@ const Map = (props) => {
 
   //set defaults when map first loads
   useEffect(() => {
+    const today = format(startOfToday(), "MM/dd/yyyy");
     console.log(props.data)
     let data = filterField(props.data, props.title);
     data = makeContinuous(data);
     setTimeSeries(data);
-    setAllStates(filterDate(data, "12/14/2020"));
+    setAllStates(filterDate(data, today));
     getAllPopulations();
     getUSPopulation();
   }, [props.data]);
@@ -235,7 +239,7 @@ const Map = (props) => {
 
   return (
     <div>
-      <div style={{display: "flex", justifyContent: "center"}}>
+      <div style={{display: "flex", marginLeft: isMobile? "6%" : "", justifyContent: "center"}}>
         <p>Total Count: <b>{addCommas(cumalativeSum)}</b></p>
         <p style={{paddingLeft: "1vw"}}>% of US Population: <b>{(cumalativeSum / USPopulation * 100).toFixed(4)}%</b></p>
       </div>

@@ -4,6 +4,7 @@ import axios from 'axios';
 import Map from '../Map/Map';
 import states from '../Map/states.json';
 import ReactTooltip from 'react-tooltip';
+import { useMediaQuery } from 'react-responsive';
 
 export default function Vaccine() {
 
@@ -16,6 +17,8 @@ export default function Vaccine() {
     const [allDefinitions, setAllDefinitions] = useState([]);
     const [content, setContent] = useState("");
 
+    const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
+    
     function extractTitles(allData) {
         const titles = [];
         allData.forEach(data => {
@@ -120,9 +123,9 @@ export default function Vaccine() {
 
     function chooseSubject(){
         return (
-            <div style={{display: "flex", justifyContent: "center"}}>
+            <div style={{display: "flex", flexDirection: isMobile? "column" : "", justifyContent: "center"}}> 
                 <div style={{padding: "1.4vw"}}>
-                    <label for="titles">Choose Data: </label>
+                    <label style={{paddingLeft: isMobile? "5%" : ""}} for="titles">Filter Data: </label>
                     <select name="titles" id="titles" onChange={(e) => setSubject(e.target.value)} value={subject}>
                     {allTitles.map(title => {
                         return(
@@ -131,7 +134,7 @@ export default function Vaccine() {
                     )}
                     </select>
                 </div>
-                <div>
+                <div style={{textAlign: isMobile? "center" : ""}}>
                     <h2 style={{fontWeight: "lighter"}}>{getDefinition()}</h2>
                 </div>
             </div>
@@ -141,7 +144,7 @@ export default function Vaccine() {
     console.log(allData);
     console.log(subject);
     return ( 
-        <div style={{marginLeft: "18%", width: "60%"}}>
+        <div style={{marginLeft: isMobile? "5%" : "18%", width: isMobile? "90%" : "60%"}}>
             {chooseSubject()}
             <Map data={allData} title={subject} setTooltipContent={setContent}/>
             <ReactTooltip>{content}</ReactTooltip>
