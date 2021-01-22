@@ -213,26 +213,26 @@ const Map = (props) => {
     let domains = extractDomain();
     console.log(domains);
     return (
-      <div style={{marginLeft: "5%", marginTop: "10%"}}>
+      <div style={{marginLeft: "5%", marginTop: isMobile? "5%" : "10%"}}>
         {domains.map((domain, i) => {
           let low = Math.round((domain.range[0] + Number.EPSILON) * 100) / 100;
           let high = Math.round((domain.range[1] + Number.EPSILON) * 100) / 100;
           return (
             <div style={{display: "flex"}}>
               {highlightBox === colors[i] ? 
-              <div style={{ backgroundColor: colors[i], padding: "0.5vw", outline: "3px solid red" }} key={i}></div>
+              <div style={{ backgroundColor: colors[i], padding: isMobile? "0.2em" : "0.5vw", outline: "3px solid red" }} key={i}></div>
               :
-              <div style={{ backgroundColor: colors[i], padding: "0.5vw" }} key={i}></div>}
-              <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
+              <div style={{ backgroundColor: colors[i], padding: isMobile? "0.2em" : "0.5vw" }} key={i}></div>}
+              <p style={{fontSize: isMobile? "6px" : "0.6vw", marginLeft: "1vw"}}>{low}% - {high}%</p>
             </div>
           )}
         )}
         <div style={{display: "flex", marginTop: "1vw"}}>
           {highlightBox === "#A9A9A9" ? 
-          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw", outline: "3px solid red" }}></div>
+          <div style={{ backgroundColor: "#A9A9A9", padding: isMobile? "0.2em" : "0.5vw", outline: "3px solid red" }}></div>
           :
-          <div style={{ backgroundColor: "#A9A9A9", padding: "0.5vw" }}></div>}
-          <p style={{fontSize: "0.6vw", marginLeft: "1vw"}}>No Data Available</p>
+          <div style={{ backgroundColor: "#A9A9A9", padding: isMobile? "0.2em" : "0.5vw" }}></div>}
+          <p style={{fontSize: isMobile? "5px" : "0.6vw", marginLeft: "1vw"}}>No Data Available</p>
         </div>
       </div>
     );
@@ -263,7 +263,7 @@ const Map = (props) => {
                       let toolContent = <p>{state_names[state[0].id] + ": N/A"}</p> 
                       if (state[0].data.length)
                         toolContent = 
-                          <div>
+                          <div style={{fontSize: isMobile? "6px" : ""}}>
                             <u>{state_names[state[0].id]}</u>
                             <p>{"Count: " + addCommas(state[0].data[0].count)}</p>
                             <p>{"% of state population: " + getRate(geo.id, state[0].data[0].count).toFixed(4) +"%"}</p>

@@ -20,11 +20,16 @@
     "react-compound-slider": "^3.3.1",
     "react-datepicker": "^3.4.1",
     "react-dom": "^17.0.1",
+    "react-landing-page": "^2.0.2",
     "react-responsive": "^8.2.0",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-simple-maps": "^2.3.0",
     "react-tooltip": "^4.2.13",
     "react-usa-map": "^1.5.0",
+    "rebass": "^4.0.7",
+    "styled-components": "^5.2.1",
+    "useref": "^1.4.3",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
