@@ -3,10 +3,10 @@ import {
   Hero, ScrollDownIndicator
 } from 'react-landing-page';
 import Vaccine from './Vaccine/Vaccine';
-import heroImage from './vaccine.png';
-import linkedin from './linkedin.png';
-import github from './github.png';
-import portfolio from './portfolio.png'
+import heroImage from './media/vaccine.png';
+import linkedin from './media/linkedin.png';
+import github from './media/github.png';
+import portfolio from './media/portfolio.png'
 import { useMediaQuery } from 'react-responsive';
  
 export default function Home() {
