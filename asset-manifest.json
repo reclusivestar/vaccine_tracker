@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/vaccine_tracker/static/css/main.8c8b27cf.chunk.css",
-    "main.js": "/vaccine_tracker/static/js/main.02c08d0b.chunk.js",
-    "main.js.map": "/vaccine_tracker/static/js/main.02c08d0b.chunk.js.map",
+    "main.js": "/vaccine_tracker/static/js/main.3ae85f37.chunk.js",
+    "main.js.map": "/vaccine_tracker/static/js/main.3ae85f37.chunk.js.map",
     "runtime-main.js": "/vaccine_tracker/static/js/runtime-main.61ef7d19.js",
     "runtime-main.js.map": "/vaccine_tracker/static/js/runtime-main.61ef7d19.js.map",
     "static/css/2.00850458.chunk.css": "/vaccine_tracker/static/css/2.00850458.chunk.css",
@@ -22,6 +22,6 @@
     "static/css/2.00850458.chunk.css",
     "static/js/2.0420fc62.chunk.js",
     "static/css/main.8c8b27cf.chunk.css",
-    "static/js/main.02c08d0b.chunk.js"
+    "static/js/main.3ae85f37.chunk.js"
   ]
 }
