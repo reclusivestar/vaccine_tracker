@@ -79,17 +79,22 @@ const Map = (props) => {
     setUSPopulation(parseInt(response.data.data[0].Population));
   }
 
+  const findFirstDiff = (str1, str2) =>
+  str2[[...str1].findIndex((el, index) => el !== str2[index])];
+
+
   //set defaults when map first loads
   useEffect(() => {
-    const today = format(startOfToday(), "MM/dd/yyyy");
     console.log(props.data)
     let data = filterField(props.data, props.title);
     //data = makeContinuous(data);
+    let UStime = new Date(Date.now()).toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
+    UStime = UStime.split(" ")[0];
+    setSelectedTime(UStime);
     setTimeSeries(data);
-    setAllStates(filterDate(data, today));
+    setAllStates(filterDate(data, UStime));
     getAllPopulations();
     getUSPopulation();
-    setSelectedTime(today);
   }, [props.data]);
 
   //changes based on the data selected

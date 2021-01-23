@@ -48,7 +48,7 @@ export default function Home() {
                     </a>
                     <div style={{fontWeight: "lighter"}}>
                     <p>Contact: tanmaysk1@gmail.com</p>
-                    <p>Sponsored by: Samuchit Pvt Ltd.</p>
+                    <p>Sponsored by: Samuchit Consultancy Service India Pvt Ltd.</p>
                     </div>
                 </div>
             </footer>
