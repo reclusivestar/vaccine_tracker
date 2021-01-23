@@ -84,7 +84,7 @@ const Map = (props) => {
     const today = format(startOfToday(), "MM/dd/yyyy");
     console.log(props.data)
     let data = filterField(props.data, props.title);
-    data = makeContinuous(data);
+    //data = makeContinuous(data);
     setTimeSeries(data);
     setAllStates(filterDate(data, today));
     getAllPopulations();
@@ -95,7 +95,7 @@ const Map = (props) => {
   //changes based on the data selected
   useEffect(() => {
     let data = filterField(props.data, props.title);
-    data = makeContinuous(data);
+    //data = makeContinuous(data);
     setTimeSeries(data);
     setAllStates(filterDate(data, selectedTime));
     getAllPopulations();
