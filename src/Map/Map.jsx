@@ -39,6 +39,7 @@ const Map = (props) => {
   const [selectedTime, setSelectedTime] = useState();
   const [cumalativeSum, setCumalativeSum] = useState(0);
   const [highlightBox, setHighlightBox] = useState("");
+  const [latestData, setLatestData] = useState([]);
 
   const isMobile = useMediaQuery({ query: `(max-width: 760px)` });
 
@@ -95,6 +96,7 @@ const Map = (props) => {
     setAllStates(filterDate(data, UStime));
     getAllPopulations();
     getUSPopulation();
+    setLatestData(filterField(filterLatest(), props.title));
   }, [props.data]);
 
   //changes based on the data selected
@@ -104,6 +106,7 @@ const Map = (props) => {
     setTimeSeries(data);
     setAllStates(filterDate(data, selectedTime));
     getAllPopulations();
+    setLatestData(filterField(filterLatest(), props.title));
   }, [props.title])
 
   //changes based on time selected
@@ -116,6 +119,18 @@ const Map = (props) => {
     if (pop) //some states not in population data
       return count / parseInt(pop.Population) * 100;
     return 0;
+  }
+
+  function filterLatest(){
+    let latest = [];
+    props.data.forEach(field => {
+        let newData = [];
+        field.data.forEach(row => {
+            newData.push({...row, data: row.data.slice(row.data.length - 1)});
+        });
+        latest.push({...field, data: newData});
+    });
+    return latest;
   }
 
   function filterField(allData, title){
@@ -211,8 +226,16 @@ const Map = (props) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
+  function getLatest(val) {
+    let state = latestData.find(state => state.val === val);
+    if (state.data.length)
+      return state;
+    return 0;
+  }
+
   console.log(allStates);
   console.log(timeSeries);
+  console.log(latestData);
 
   function legend(){
     let domains = extractDomain();
@@ -243,6 +266,29 @@ const Map = (props) => {
     );
   }
 
+  function formatToolTip(val) {
+    let state = allStates.filter(state => state.val === val);
+    let toolContent = <p>{state_names[state[0].id] + ": N/A"}</p> 
+    let latestInfo = getLatest(val);
+    if (latestInfo)
+      toolContent = 
+      <div style={{fontSize: isMobile? "6px" : ""}}>
+        <u>{state_names[latestInfo.id] + ": N/A"}</u>
+        <p><i>{"Data Last Available: " + latestInfo.data[0].date}</i></p>
+        <p><i>{"Last Count: " + addCommas(latestInfo.data[0].count)}</i></p>
+        <p><i>{"% of state population: " + getRate(latestInfo.val, latestInfo.data[0].count).toFixed(4) +"%"}</i></p>
+      </div>
+
+    if (state[0].data.length)
+      toolContent = 
+        <div style={{fontSize: isMobile? "6px" : ""}}>
+          <u>{state_names[state[0].id]}</u>
+          <p>{"Count: " + addCommas(state[0].data[0].count)}</p>
+          <p>{"% of state population: " + getRate(val, state[0].data[0].count).toFixed(4) +"%"}</p>
+        </div>;
+    return toolContent;
+  }
+
   return (
     <div>
       <div style={{display: "flex", marginLeft: isMobile? "6%" : "", justifyContent: "center"}}>
@@ -264,16 +310,7 @@ const Map = (props) => {
                     fill={cur && cur.data[0] ? colorScale(getRate(cur.val, cur.data[0].count)) : "#A9A9A9"}
                     onClick={handleClick(geo.id)}
                     onMouseEnter={() => {
-                      let state = allStates.filter(state => state.val === geo.id);
-                      let toolContent = <p>{state_names[state[0].id] + ": N/A"}</p> 
-                      if (state[0].data.length)
-                        toolContent = 
-                          <div style={{fontSize: isMobile? "6px" : ""}}>
-                            <u>{state_names[state[0].id]}</u>
-                            <p>{"Count: " + addCommas(state[0].data[0].count)}</p>
-                            <p>{"% of state population: " + getRate(geo.id, state[0].data[0].count).toFixed(4) +"%"}</p>
-                          </div>;
-                      props.setTooltipContent(toolContent);
+                      props.setTooltipContent(formatToolTip(geo.id));
                       setHighlightBox(cur && cur.data[0] ? colorScale(getRate(cur.val, cur.data[0].count)) : "#A9A9A9");
                     }}
                     onMouseLeave={() => {
