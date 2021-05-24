@@ -8,8 +8,8 @@ import { useMediaQuery } from 'react-responsive';
 
 export default function Vaccine() {
 
-    const url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/raw_data/vaccine_data_us_state_timeline.csv";
-    const definitions_url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/raw_data/data_dictionary.csv";
+    const url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/archive/vaccine_data_us_state_timeline.csv";
+    const definitions_url = "https://raw.githubusercontent.com/govex/COVID-19/master/data_tables/vaccine_data/archive/data_dictionary.csv";
 
     const [allData, setAllData] = useState([]); //in time series
     const [subject, setSubject] = useState("doses_admin_total");

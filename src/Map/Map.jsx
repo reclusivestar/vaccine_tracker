@@ -89,7 +89,7 @@ const Map = (props) => {
     console.log(props.data)
     let data = filterField(props.data, props.title);
     //data = makeContinuous(data);
-    let UStime = new Date(Date.now()).toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
+    let UStime = new Date("02/26/2021").toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
     UStime = UStime.split(" ")[0];
     setSelectedTime(UStime);
     setTimeSeries(data);

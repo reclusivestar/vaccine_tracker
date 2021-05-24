@@ -20,7 +20,7 @@ const timeStep = 1000 * 60 * 1440;
 
 export default function Time(props) {
 
-    let UStime = new Date(Date.now()).toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
+    let UStime = new Date("02/26/2021").toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
     UStime = UStime.split(" ")[0];
     const today = new Date(UStime);
     const [selected, setSelected] = useState(today);
