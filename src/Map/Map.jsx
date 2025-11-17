@@ -30,12 +30,14 @@ const offsets = {
 };
 
 const Map = (props) => {
-  const url = "https://datausa.io/api/data?drilldowns=State&measures=Population";
-  const us_population_url = "https://datausa.io/api/data?drilldowns=Nation&measures=Population";
+  // Census 2021 PEP state populations (returns rows with POP_2021, NAME, state)
+  const censusPopUrl =
+    "https://api.census.gov/data/2021/pep/population?get=POP_2021,NAME&for=state:*";
   const [allStates, setAllStates] = useState([]);
   const [timeSeries, setTimeSeries] = useState([]);
   const [populations, setPopulations] = useState([]);
-  const [USPopulation, setUSPopulation] = useState([]);
+  // USPopulation is a numeric total computed as the sum of state populations
+  const [USPopulation, setUSPopulation] = useState(0);
   const [selectedTime, setSelectedTime] = useState();
   const [cumalativeSum, setCumalativeSum] = useState(0);
   const [highlightBox, setHighlightBox] = useState("");
@@ -71,13 +73,26 @@ const Map = (props) => {
     return domains;
   }
 
-  async function getAllPopulations(){
-    const response = await axios.get(url); 
-    setPopulations(response.data.data);
-  }
-  async function getUSPopulation(){
-    const response = await axios.get(us_population_url); 
-    setUSPopulation(parseInt(response.data.data[0].Population));
+  // CHANGED: populations will be an array of { state: "01", population: number }
+  async function getAllPopulations() {
+    const response = await axios.get(censusPopUrl);
+    // response.data is an array: [header, ...rows]
+    const [header, ...rows] = response.data;
+
+    const popIndex = header.indexOf("POP_2021");
+    const stateIndex = header.indexOf("state");
+
+    const pops = rows.map((row) => {
+      const stateCode = String(row[stateIndex]).padStart(2, "0");
+      const pop = parseInt(row[popIndex], 10);
+      return { state: stateCode, population: pop };
+    });
+
+    setPopulations(pops);
+
+    // compute US total as sum of state populations
+    const totalUS = pops.reduce((sum, s) => sum + (s.population || 0), 0);
+    setUSPopulation(totalUS);
   }
 
   const findFirstDiff = (str1, str2) =>
@@ -89,13 +104,12 @@ const Map = (props) => {
     console.log(props.data)
     let data = filterField(props.data, props.title);
     //data = makeContinuous(data);
-    let UStime = new Date("02/26/2021").toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
-    UStime = UStime.split(" ")[0];
+    // Use a consistent MM/dd/yyyy format for the initial date so it matches the CSV and the Time component
+    let UStime = format(new Date("02/26/2021"), "MM/dd/yyyy");
     setSelectedTime(UStime);
     setTimeSeries(data);
     setAllStates(filterDate(data, UStime));
     getAllPopulations();
-    getUSPopulation();
     setLatestData(filterField(filterLatest(), props.title));
   }, [props.data]);
 
@@ -115,9 +129,10 @@ const Map = (props) => {
   }, [selectedTime]);
 
   function getRate(val, count){
-    let pop = populations.filter(state => state["ID State"].slice(-2) === val)[0];
-    if (pop) //some states not in population data
-      return count / parseInt(pop.Population) * 100;
+    // val is a two-digit FIPS like "01" matching our populations[].state
+    const popObj = populations.find((p) => p.state === val);
+    if (popObj && popObj.population)
+      return (count / popObj.population) * 100;
     return 0;
   }
 
@@ -355,7 +370,7 @@ const Map = (props) => {
         </div>
         {legend()}
       </div>
-    <Time selectDate={setSelectedTime}/>
+    <Time selectDate={setSelectedTime} selectedDate={selectedTime} />
     </div>
   );
 };

@@ -20,12 +20,21 @@ const timeStep = 1000 * 60 * 1440;
 
 export default function Time(props) {
 
+  // If the parent supplies a selectedDate, use it so Time and Map stay in sync.
+  // Expect format MM/dd/yyyy (same as format(new Date(...), "MM/dd/yyyy") used in Map).
+  const initialSelected = props.selectedDate ? new Date(props.selectedDate) : (() => {
     let UStime = new Date("02/26/2021").toLocaleString("es-PA", {timeZone: "America/Los_Angeles"});
     UStime = UStime.split(" ")[0];
-    const today = new Date(UStime);
-    const [selected, setSelected] = useState(today);
-    const [min, setMin] = useState(new Date("12/14/2020"));
-    const [max, setMax] = useState(today);
+    return new Date(UStime);
+  })();
+  const [selected, setSelected] = useState(initialSelected);
+  // keep internal selected in sync if parent updates selectedDate
+  useEffect(() => {
+    if (props.selectedDate) setSelected(new Date(props.selectedDate));
+  }, [props.selectedDate]);
+  const [min, setMin] = useState(new Date("12/14/2020"));
+  // default max/end date should match the initially selected date
+  const [max, setMax] = useState(initialSelected);
 
 
     const isTablet = useMediaQuery({ query: `(max-width: 1400px)` });
